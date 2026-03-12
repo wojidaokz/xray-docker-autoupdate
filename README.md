@@ -152,7 +152,7 @@ docker compose ps
 ```
 NAME        IMAGE                            STATUS
 xray        ghcr.io/xtls/xray-core:latest    Up
-watchtower  containrrr/watchtower            Up
+watchtower  nickfedor/watchtower             Up
 ```
 
 ### 6. Проверка работы
@@ -255,7 +255,7 @@ cat logs/error.log
 
 ### Автообновление (Watchtower)
 
-[Watchtower](https://github.com/containrrr/watchtower) автоматически проверяет `ghcr.io/xtls/xray-core:latest` каждые 24 часа.
+[Watchtower](https://github.com/nickfedor/watchtower) автоматически проверяет `ghcr.io/xtls/xray-core:latest` каждые 24 часа.
 
 При обнаружении новой версии:
 1. Скачивает новый образ
