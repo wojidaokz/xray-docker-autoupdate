@@ -20,48 +20,38 @@
       "listen": "0.0.0.0",
       "protocol": "http",
       "settings": {}
-    },
-    {
-      "tag": "VLESS_TCP_REALITY",
-      "port": 443,
-      "listen": "0.0.0.0",
-      "protocol": "vless",
-      "settings": {
-        "clients": [
-          {
-            "id": "YOUR-UUID-HERE",
-            "flow": "xtls-rprx-vision"
-          }
-        ],
-        "decryption": "none"
-      },
-      "sniffing": {
-        "enabled": true,
-        "destOverride": [
-          "http",
-          "tls",
-          "quic"
-        ]
-      },
-      "streamSettings": {
-        "network": "raw",
-        "security": "reality",
-        "realitySettings": {
-          "show": false,
-          "xver": 0,
-          "target": "example.com:443",
-          "shortIds": [
-            "YOUR-SHORT-ID-HERE"
-          ],
-          "privateKey": "YOUR-PRIVATE-KEY-HERE",
-          "serverNames": [
-            "example.com"
-          ]
-        }
-      }
     }
   ],
   "outbounds": [
+    {
+      "tag": "PROXY",
+      "protocol": "vless",
+      "settings": {
+        "vnext": [
+          {
+            "address": "YOUR-SERVER-ADDRESS",
+            "port": 443,
+            "users": [
+              {
+                "id": "YOUR-UUID-HERE",
+                "encryption": "none",
+                "flow": "xtls-rprx-vision"
+              }
+            ]
+          }
+        ]
+      },
+      "streamSettings": {
+        "network": "tcp",
+        "security": "reality",
+        "realitySettings": {
+          "fingerprint": "chrome",
+          "publicKey": "YOUR-PUBLIC-KEY-HERE",
+          "serverName": "YOUR-SNI-DOMAIN",
+          "shortId": "YOUR-SHORT-ID-HERE"
+        }
+      }
+    },
     {
       "tag": "DIRECT",
       "protocol": "freedom"
@@ -72,20 +62,21 @@
     }
   ],
   "routing": {
+    "domainStrategy": "IPIfNonMatch",
     "rules": [
       {
         "type": "field",
         "ip": [
           "geoip:private"
         ],
-        "outboundTag": "BLOCK"
+        "outboundTag": "DIRECT"
       },
       {
         "type": "field",
         "domain": [
           "geosite:private"
         ],
-        "outboundTag": "BLOCK"
+        "outboundTag": "DIRECT"
       },
       {
         "type": "field",

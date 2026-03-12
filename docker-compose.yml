@@ -5,7 +5,7 @@ services:
     restart: unless-stopped
     network_mode: host
     volumes:
-      - ./config.json:/etc/xray/config.json
+      - ./config.json:/usr/local/etc/xray/config.json
       - ./logs:/var/log/xray
 
   watchtower:
