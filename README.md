@@ -253,9 +253,9 @@ cat logs/access.log
 cat logs/error.log
 ```
 
-### Автообновление
+### Автообновление (Watchtower)
 
-Watchtower автоматически проверяет `ghcr.io/xtls/xray-core:latest` каждые 24 часа.
+[Watchtower](https://github.com/containrrr/watchtower) автоматически проверяет `ghcr.io/xtls/xray-core:latest` каждые 24 часа.
 
 При обнаружении новой версии:
 1. Скачивает новый образ
@@ -280,6 +280,45 @@ docker compose restart watchtower
 | Каждые 12 часов | `43200` |
 | Раз в сутки | `86400` |
 | Раз в неделю | `604800` |
+
+</details>
+
+<details>
+<summary><b>Почему Watchtower v1.7.1</b></summary>
+
+Watchtower `v1.7.1` (ноябрь 2023) — последняя версия проекта. Разработка официально прекращена, однако для задачи отслеживания и обновления одного контейнера он работает стабильно и надёжно.
+
+В `docker-compose.yml` добавлена переменная `DOCKER_API_VERSION=1.40` — она необходима для совместимости Watchtower с Docker Engine 25+ (Docker обновил минимальную версию API, а Watchtower использует старый клиент).
+
+**Как убедиться что Watchtower работает:**
+
+```bash
+# Статус контейнера (должен быть Up, а не Restarting)
+docker compose ps watchtower
+
+# Логи — должна быть строка "Scheduling first run"
+docker compose logs watchtower
+```
+
+**Что должно быть в логах при нормальной работе:**
+
+```
+Watchtower 1.7.1
+Using no notifications
+Only checking containers which name matches "xray"
+Scheduling first run: 2026-03-13 09:17:43 +0000 UTC
+```
+
+**Что должно быть после успешного обновления:**
+
+```
+Found new ghcr.io/xtls/xray-core:latest image
+Stopping /xray ...
+Creating /xray ...
+Removing image ...
+```
+
+**Если Watchtower падает в цикл перезапусков** — смотрите раздел [Решение проблем](#решение-проблем).
 
 </details>
 
