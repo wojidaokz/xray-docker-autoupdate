@@ -397,6 +397,26 @@ ports:
 </details>
 
 <details>
+<summary><b>Watchtower постоянно перезапускается (Restarting)</b></summary>
+
+Проверьте логи:
+```bash
+docker compose logs watchtower
+```
+
+Если видите ошибку `client version 1.25 is too old. Minimum supported API version is 1.40`:
+
+Это несовместимость версии Docker API. В `docker-compose.yml` уже добавлена переменная `DOCKER_API_VERSION=1.40` для решения этой проблемы. Если вы обновили Docker до новейшей версии и ошибка вернулась — проверьте текущую версию API:
+
+```bash
+docker version --format '{{.Server.APIVersion}}'
+```
+
+И при необходимости обновите значение `DOCKER_API_VERSION` в `docker-compose.yml`.
+
+</details>
+
+<details>
 <summary><b>Watchtower не обновляет контейнер</b></summary>
 
 Проверьте логи:
