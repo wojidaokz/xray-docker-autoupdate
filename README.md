@@ -8,7 +8,7 @@
 
 [![Docker](https://img.shields.io/badge/Docker-2496ED?style=for-the-badge&logo=docker&logoColor=white)](https://www.docker.com/)
 [![Xray](https://img.shields.io/badge/Xray_Core-000000?style=for-the-badge&logo=v2ray&logoColor=white)](https://github.com/XTLS/Xray-core)
-[![Watchtower](https://img.shields.io/badge/Watchtower-0db7ed?style=for-the-badge&logo=containerd&logoColor=white)](https://github.com/containrrr/watchtower)
+[![Watchtower](https://img.shields.io/badge/Watchtower-0db7ed?style=for-the-badge&logo=containerd&logoColor=white)](https://github.com/nickfedor/watchtower)
 [![Linux](https://img.shields.io/badge/Linux-FCC624?style=for-the-badge&logo=linux&logoColor=black)](https://www.linux.org/)
 [![VLESS](https://img.shields.io/badge/VLESS-Reality-blueviolet?style=for-the-badge)](https://github.com/XTLS/Xray-core)
 
@@ -284,11 +284,14 @@ docker compose restart watchtower
 </details>
 
 <details>
-<summary><b>Почему Watchtower v1.7.1</b></summary>
+<summary><b>О Watchtower</b></summary>
 
-Watchtower `v1.7.1` (ноябрь 2023) — последняя версия проекта. Разработка официально прекращена, однако для задачи отслеживания и обновления одного контейнера он работает стабильно и надёжно.
+Используется [nickfedor/watchtower](https://github.com/nickfedor/watchtower) — активно развиваемый форк оригинального [containrrr/watchtower](https://github.com/containrrr/watchtower) (оригинал заморожен с ноября 2023).
 
-В `docker-compose.yml` добавлена переменная `DOCKER_API_VERSION=1.40` — она необходима для совместимости Watchtower с Docker Engine 25+ (Docker обновил минимальную версию API, а Watchtower использует старый клиент).
+Форк полностью совместим по конфигурации, при этом:
+- Поддерживает актуальные версии Docker API (v1.51+)
+- Регулярно обновляется (версия 1.14.x, Go 1.25+)
+- Исправлены критические баги оригинала
 
 **Как убедиться что Watchtower работает:**
 
@@ -296,17 +299,16 @@ Watchtower `v1.7.1` (ноябрь 2023) — последняя версия пр
 # Статус контейнера (должен быть Up, а не Restarting)
 docker compose ps watchtower
 
-# Логи — должна быть строка "Scheduling first run"
+# Логи — должна быть строка "Next scheduled run"
 docker compose logs watchtower
 ```
 
 **Что должно быть в логах при нормальной работе:**
 
 ```
-Watchtower 1.7.1
+Watchtower 1.14.3 using Docker API v1.51
 Using no notifications
-Only checking containers which name matches "xray"
-Scheduling first run: 2026-03-13 09:17:43 +0000 UTC
+Next scheduled run: 2026-03-13 09:25:32 UTC in 23 hours, 59 minutes, 59 seconds
 ```
 
 **Что должно быть после успешного обновления:**
@@ -317,8 +319,6 @@ Stopping /xray ...
 Creating /xray ...
 Removing image ...
 ```
-
-**Если Watchtower падает в цикл перезапусков** — смотрите раздел [Решение проблем](#решение-проблем).
 
 </details>
 
@@ -443,15 +443,7 @@ ports:
 docker compose logs watchtower
 ```
 
-Если видите ошибку `client version 1.25 is too old. Minimum supported API version is 1.40`:
-
-Это несовместимость версии Docker API. В `docker-compose.yml` уже добавлена переменная `DOCKER_API_VERSION=1.40` для решения этой проблемы. Если вы обновили Docker до новейшей версии и ошибка вернулась — проверьте текущую версию API:
-
-```bash
-docker version --format '{{.Server.APIVersion}}'
-```
-
-И при необходимости обновите значение `DOCKER_API_VERSION` в `docker-compose.yml`.
+Убедитесь что используется образ `nickfedor/watchtower` (активный форк), а не устаревший `containrrr/watchtower`. Оригинальный образ не совместим с Docker Engine 25+ из-за устаревшего Docker API клиента.
 
 </details>
 

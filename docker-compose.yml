@@ -9,7 +9,7 @@ services:
       - ./logs:/var/log/xray
 
   watchtower:
-    image: containrrr/watchtower
+    image: nickfedor/watchtower
     container_name: watchtower
     restart: unless-stopped
     volumes:
@@ -18,5 +18,4 @@ services:
       - WATCHTOWER_CLEANUP=true
       - WATCHTOWER_POLL_INTERVAL=86400
       - WATCHTOWER_INCLUDE_RESTARTING=true
-      - DOCKER_API_VERSION=1.40
     command: xray
