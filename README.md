@@ -585,6 +585,12 @@ ls -la /var/run/docker.sock
 
 ---
 
+## Автор
+
+**Vladislav Demidov** — [@wojidaokz](https://github.com/wojidaokz)
+
+---
+
 <div align="center">
 
 **[Наверх](#xray-docker-auto-update)**
