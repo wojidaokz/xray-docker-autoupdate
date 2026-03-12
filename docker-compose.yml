@@ -1,0 +1,21 @@
+services:
+  xray:
+    image: ghcr.io/xtls/xray-core:latest
+    container_name: xray
+    restart: unless-stopped
+    network_mode: host
+    volumes:
+      - ./config.json:/etc/xray/config.json
+      - ./logs:/var/log/xray
+
+  watchtower:
+    image: containrrr/watchtower
+    container_name: watchtower
+    restart: unless-stopped
+    volumes:
+      - /var/run/docker.sock:/var/run/docker.sock
+    environment:
+      - WATCHTOWER_CLEANUP=true
+      - WATCHTOWER_POLL_INTERVAL=86400
+      - WATCHTOWER_INCLUDE_RESTARTING=true
+    command: xray
