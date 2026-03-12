@@ -8,7 +8,7 @@
 
 [![Docker](https://img.shields.io/badge/Docker-2496ED?style=for-the-badge&logo=docker&logoColor=white)](https://www.docker.com/)
 [![Xray](https://img.shields.io/badge/Xray_Core-000000?style=for-the-badge&logo=v2ray&logoColor=white)](https://github.com/XTLS/Xray-core)
-[![Watchtower](https://img.shields.io/badge/Watchtower-0db7ed?style=for-the-badge&logo=containerd&logoColor=white)](https://github.com/nickfedor/watchtower)
+[![Watchtower](https://img.shields.io/badge/Watchtower-0db7ed?style=for-the-badge&logo=containerd&logoColor=white)](https://github.com/nicholas-fedor/watchtower)
 [![Linux](https://img.shields.io/badge/Linux-FCC624?style=for-the-badge&logo=linux&logoColor=black)](https://www.linux.org/)
 [![VLESS](https://img.shields.io/badge/VLESS-Reality-blueviolet?style=for-the-badge)](https://github.com/XTLS/Xray-core)
 
@@ -214,7 +214,7 @@ environment:
 
 ### Туннель (TUN-режим)
 
-Если нужно направить **весь системный трафик** через прокси (а не только приложения с поддержкой SOCKS5/HTTP), используйте [socks2tun](https://github.com/nicksrepo/socks2tun) — он создаёт TUN-интерфейс поверх SOCKS5-прокси.
+Если нужно направить **весь системный трафик** через прокси (а не только приложения с поддержкой SOCKS5/HTTP), используйте [tun2socks](https://github.com/xjasonlyu/tun2socks) — он создаёт TUN-интерфейс поверх SOCKS5-прокси.
 
 ---
 
@@ -255,7 +255,7 @@ cat logs/error.log
 
 ### Автообновление (Watchtower)
 
-[Watchtower](https://github.com/nickfedor/watchtower) автоматически проверяет `ghcr.io/xtls/xray-core:latest` каждые 24 часа.
+[Watchtower](https://github.com/nicholas-fedor/watchtower) автоматически проверяет `ghcr.io/xtls/xray-core:latest` каждые 24 часа.
 
 При обнаружении новой версии:
 1. Скачивает новый образ
@@ -286,7 +286,7 @@ docker compose restart watchtower
 <details>
 <summary><b>О Watchtower</b></summary>
 
-Используется [nickfedor/watchtower](https://github.com/nickfedor/watchtower) — активно развиваемый форк оригинального [containrrr/watchtower](https://github.com/containrrr/watchtower) (оригинал заморожен с ноября 2023).
+Используется [nickfedor/watchtower](https://github.com/nicholas-fedor/watchtower) — активно развиваемый форк оригинального [containrrr/watchtower](https://github.com/containrrr/watchtower) (оригинал заморожен с ноября 2023).
 
 Форк полностью совместим по конфигурации, при этом:
 - Поддерживает актуальные версии Docker API (v1.51+)
