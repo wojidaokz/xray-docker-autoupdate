@@ -1,35 +1,83 @@
-# Xray Docker с автообновлением
+<div align="center">
 
-Готовое решение для запуска [Xray](https://github.com/XTLS/Xray-core) прокси-сервера в Docker-контейнере с автоматическим обновлением через [Watchtower](https://github.com/containrrr/watchtower).
+<img src="https://raw.githubusercontent.com/XTLS/Xray-core/main/docs/Xray-logo.png" alt="Xray" width="120"/>
 
-## Что включено
+# Xray Docker Auto-Update
 
-| Компонент | Описание |
-|-----------|----------|
-| **Xray** | Прокси-сервер на базе официального образа `ghcr.io/xtls/xray-core` |
-| **Watchtower** | Автоматически проверяет наличие новых версий образа Xray раз в сутки, обновляет контейнер и удаляет старые образы |
+**Готовое решение для запуска Xray прокси-сервера в Docker с автоматическим обновлением**
+
+[![Docker](https://img.shields.io/badge/Docker-2496ED?style=for-the-badge&logo=docker&logoColor=white)](https://www.docker.com/)
+[![Xray](https://img.shields.io/badge/Xray_Core-000000?style=for-the-badge&logo=v2ray&logoColor=white)](https://github.com/XTLS/Xray-core)
+[![Watchtower](https://img.shields.io/badge/Watchtower-0db7ed?style=for-the-badge&logo=containerd&logoColor=white)](https://github.com/containrrr/watchtower)
+[![Linux](https://img.shields.io/badge/Linux-FCC624?style=for-the-badge&logo=linux&logoColor=black)](https://www.linux.org/)
+[![VLESS](https://img.shields.io/badge/VLESS-Reality-blueviolet?style=for-the-badge)](https://github.com/XTLS/Xray-core)
+
+[![GitHub release](https://img.shields.io/github/v/release/XTLS/Xray-core?label=Xray%20Latest&style=flat-square&color=blue)](https://github.com/XTLS/Xray-core/releases)
+[![License](https://img.shields.io/badge/License-MIT-green?style=flat-square)](LICENSE)
+[![GitHub Stars](https://img.shields.io/github/stars/wojidaokz/xray-docker-autoupdate?style=flat-square)](https://github.com/wojidaokz/xray-docker-autoupdate)
+
+</div>
+
+---
+
+## Возможности
+
+- **Автообновление** — Watchtower проверяет новые версии Xray каждые 24 часа и обновляет контейнер без простоя
+- **VLESS + Reality** — современный протокол с маскировкой трафика, не требующий домена и сертификатов
+- **Routing-правила** — блокировка приватных сетей и BitTorrent из коробки
+- **Логирование** — доступ и ошибки пишутся в файлы на хосте
+- **Простой запуск** — один `docker compose up -d` и всё работает
+
+---
+
+## Архитектура
+
+```mermaid
+graph TB
+    subgraph Docker Host
+        X[🛡 Xray<br/>VLESS + Reality<br/>Port 443]
+        W[🔄 Watchtower<br/>Проверка обновлений<br/>каждые 24ч]
+    end
+
+    C[📱 Клиенты] -->|VLESS + Reality| X
+    X --- CF[📄 config.json]
+    X --- LG[📋 logs/]
+    W -->|docker.sock| X
+    W -->|pull| GHCR[📦 ghcr.io/xtls/xray-core]
+
+    style X fill:#4a90d9,stroke:#2c5282,color:#fff
+    style W fill:#0db7ed,stroke:#086d8c,color:#fff
+    style GHCR fill:#6e5494,stroke:#4a3768,color:#fff
+    style C fill:#48bb78,stroke:#276749,color:#fff
+```
+
+---
 
 ## Требования
 
-- Linux-сервер (Ubuntu 20.04+, Debian 11+, CentOS 8+ или аналогичный)
-- Docker Engine 20.10+
-- Docker Compose v2+
-- Открытый порт 443 (или другой, указанный в конфигурации)
-- Доменное имя (опционально, зависит от выбранного протокола)
+| Компонент | Минимальная версия |
+|---|---|
+| **ОС** | Ubuntu 20.04+ / Debian 11+ / CentOS 8+ |
+| **Docker Engine** | 20.10+ |
+| **Docker Compose** | v2+ |
+| **Порт** | 443 (открыт в файрволе) |
+| **RAM** | 512 MB |
+| **CPU** | 1 vCPU |
 
-## Установка
+---
 
-### 1. Установка Docker и Docker Compose
+## Быстрый старт
 
-Если Docker ещё не установлен:
+### 1. Установка Docker
 
 ```bash
 curl -fsSL https://get.docker.com | sh
 ```
 
-Docker Compose v2 устанавливается вместе с Docker Engine. Проверьте:
+Проверьте установку:
 
 ```bash
+docker --version
 docker compose version
 ```
 
@@ -42,59 +90,67 @@ cd xray-docker-autoupdate
 
 ### 3. Генерация ключей
 
-Сгенерируйте UUID для клиента:
+<details>
+<summary><b>UUID для клиента</b></summary>
 
 ```bash
 docker run --rm ghcr.io/xtls/xray-core:latest xray uuid
 ```
 
-Сгенерируйте пару ключей для Reality:
+Пример вывода:
+```
+a1b2c3d4-e5f6-7890-abcd-ef1234567890
+```
+
+</details>
+
+<details>
+<summary><b>Ключи Reality (x25519)</b></summary>
 
 ```bash
 docker run --rm ghcr.io/xtls/xray-core:latest xray x25519
 ```
 
-Команда выведет `Private key` и `Public key`. Сохраните оба — приватный ключ нужен для сервера, публичный — для клиента.
+Пример вывода:
+```
+Private key: aBcDeFgHiJkLmNoPqRsTuVwXyZ0123456789abcdef0
+Public key:  xYzAbCdEfGhIjKlMnOpQrStUvWxYz0123456789abc
+```
 
-Сгенерируйте Short ID (случайный hex, 8 символов):
+> **Private key** — для сервера (`config.json`), **Public key** — для клиента
+
+</details>
+
+<details>
+<summary><b>Short ID</b></summary>
 
 ```bash
 openssl rand -hex 8
 ```
 
-### 4. Настройка конфигурации
+Пример вывода:
+```
+a1b2c3d4e5f6g7h8
+```
 
-Откройте файл `config.json` и замените плейсхолдеры:
+</details>
+
+### 4. Настройка конфигурации
 
 ```bash
 nano config.json
 ```
 
-| Плейсхолдер | Что подставить |
-|---|---|
-| `YOUR-UUID-HERE` | UUID, сгенерированный на шаге 3 |
-| `YOUR-PRIVATE-KEY-HERE` | Private key из вывода `xray x25519` |
-| `YOUR-SHORT-ID-HERE` | Short ID, сгенерированный на шаге 3 |
+Замените плейсхолдеры:
 
-#### Пример заполненного конфига (значения вымышленные):
+| Плейсхолдер | Описание | Где взять |
+|---|---|---|
+| `YOUR-UUID-HERE` | UUID клиента | Шаг 3 → UUID |
+| `YOUR-PRIVATE-KEY-HERE` | Приватный ключ Reality | Шаг 3 → x25519 |
+| `YOUR-SHORT-ID-HERE` | Идентификатор сессии | Шаг 3 → Short ID |
+| `example.com` | Сайт-маскировка для Reality | Любой сайт с TLS 1.3 и H2 |
 
-```json
-{
-  "clients": [
-    {
-      "id": "a1b2c3d4-e5f6-7890-abcd-ef1234567890",
-      "flow": "xtls-rprx-vision"
-    }
-  ]
-}
-```
-
-```json
-{
-  "privateKey": "aBcDeFgHiJkLmNoPqRsTuVwXyZ0123456789abcdef0",
-  "shortIds": ["a1b2c3d4e5f6g7h8"]
-}
-```
+> **Совет:** для маскировки подходят крупные сайты с поддержкой TLS 1.3 — `www.google.com`, `www.microsoft.com`, `www.apple.com`, `dl.google.com` и другие.
 
 ### 5. Запуск
 
@@ -102,13 +158,11 @@ nano config.json
 docker compose up -d
 ```
 
-Проверьте, что оба контейнера запущены:
+Проверка статуса:
 
 ```bash
 docker compose ps
 ```
-
-Ожидаемый вывод:
 
 ```
 NAME        IMAGE                            STATUS
@@ -116,165 +170,217 @@ xray        ghcr.io/xtls/xray-core:latest    Up
 watchtower  containrrr/watchtower            Up
 ```
 
+> Готово! Сервер работает и будет автоматически обновляться.
+
+---
+
 ## Настройка клиента
 
-Для подключения к серверу на клиентской стороне используйте следующие параметры:
+### Параметры подключения
 
 | Параметр | Значение |
 |---|---|
-| Протокол | VLESS |
-| Адрес | IP-адрес или домен вашего сервера |
-| Порт | 443 |
-| UUID | Тот же UUID, что в `config.json` |
-| Flow | `xtls-rprx-vision` |
-| Безопасность | Reality |
-| SNI | `www.google.com` |
-| Public Key | Публичный ключ из вывода `xray x25519` |
-| Short ID | Тот же Short ID, что в `config.json` |
-| Fingerprint | `chrome` |
+| **Протокол** | VLESS |
+| **Адрес** | IP-адрес вашего сервера |
+| **Порт** | 443 |
+| **UUID** | Тот же, что в `config.json` |
+| **Flow** | `xtls-rprx-vision` |
+| **Безопасность** | Reality |
+| **SNI** | Домен из `serverNames` в конфиге |
+| **Public Key** | Публичный ключ (из `xray x25519`) |
+| **Short ID** | Тот же, что в `config.json` |
+| **Fingerprint** | `chrome` |
 
 ### Рекомендуемые клиенты
 
-| Платформа | Клиент |
-|---|---|
-| Windows | [Hiddify](https://github.com/hiddify/hiddify-app), [v2rayN](https://github.com/2dust/v2rayN) |
-| macOS | [Hiddify](https://github.com/hiddify/hiddify-app), [V2BOX](https://apps.apple.com/app/v2box-v2ray-client/id6446814690) |
-| Linux | [Hiddify](https://github.com/hiddify/hiddify-app), [Nekoray](https://github.com/MatsuriDayo/nekoray) |
-| Android | [Hiddify](https://github.com/hiddify/hiddify-app), [v2rayNG](https://github.com/2dust/v2rayNG) |
-| iOS | [Hiddify](https://github.com/hiddify/hiddify-app), [Streisand](https://apps.apple.com/app/streisand/id6450534064) |
+| Платформа | Клиент | |
+|---|---|---|
+| <img src="https://img.shields.io/badge/Windows-0078D6?style=flat-square&logo=windows&logoColor=white" /> | [Hiddify](https://github.com/hiddify/hiddify-app) | [v2rayN](https://github.com/2dust/v2rayN) |
+| <img src="https://img.shields.io/badge/macOS-000000?style=flat-square&logo=apple&logoColor=white" /> | [Hiddify](https://github.com/hiddify/hiddify-app) | [V2BOX](https://apps.apple.com/app/v2box-v2ray-client/id6446814690) |
+| <img src="https://img.shields.io/badge/Linux-FCC624?style=flat-square&logo=linux&logoColor=black" /> | [Hiddify](https://github.com/hiddify/hiddify-app) | [Nekoray](https://github.com/MatsuriDayo/nekoray) |
+| <img src="https://img.shields.io/badge/Android-3DDC84?style=flat-square&logo=android&logoColor=white" /> | [Hiddify](https://github.com/hiddify/hiddify-app) | [v2rayNG](https://github.com/2dust/v2rayNG) |
+| <img src="https://img.shields.io/badge/iOS-000000?style=flat-square&logo=apple&logoColor=white" /> | [Hiddify](https://github.com/hiddify/hiddify-app) | [Streisand](https://apps.apple.com/app/streisand/id6450534064) |
+
+---
 
 ## Управление
 
 ### Основные команды
 
 ```bash
-# Запуск
+# Запуск контейнеров
 docker compose up -d
 
 # Остановка
 docker compose down
 
-# Перезапуск Xray (например, после изменения конфига)
+# Перезапуск Xray (после изменения config.json)
 docker compose restart xray
 
-# Просмотр логов Xray
-docker compose logs xray
-
-# Просмотр логов Watchtower
-docker compose logs watchtower
-
-# Просмотр логов в реальном времени
-docker compose logs -f xray
+# Статус контейнеров
+docker compose ps
 ```
 
-### Проверка работы автообновления
+### Просмотр логов
 
-Watchtower проверяет наличие обновлений раз в 24 часа (86400 секунд). Чтобы принудительно проверить обновление:
+```bash
+# Логи Xray
+docker compose logs xray
+
+# Логи Watchtower (обновления)
+docker compose logs watchtower
+
+# Логи в реальном времени
+docker compose logs -f xray
+
+# Файловые логи
+cat logs/access.log
+cat logs/error.log
+```
+
+### Автообновление
+
+Watchtower автоматически проверяет `ghcr.io/xtls/xray-core:latest` каждые 24 часа.
+
+При обнаружении новой версии:
+1. Скачивает новый образ
+2. Останавливает контейнер Xray
+3. Запускает контейнер с новым образом
+4. Удаляет старый образ
+
+Принудительная проверка:
 
 ```bash
 docker compose restart watchtower
 ```
 
-Посмотреть лог обновлений:
+<details>
+<summary><b>Изменение интервала проверки</b></summary>
 
-```bash
-docker compose logs watchtower
-```
+Отредактируйте `WATCHTOWER_POLL_INTERVAL` в `docker-compose.yml`:
 
-При успешном обновлении в логах будет запись вида:
-
-```
-Found new ghcr.io/xtls/xray-core:latest image
-Stopping xray ...
-Creating xray ...
-Removing old image ...
-```
-
-## Логи Xray
-
-Логи доступны в директории `./logs/`:
-
-```bash
-# Лог доступа
-cat logs/access.log
-
-# Лог ошибок
-cat logs/error.log
-```
-
-Для изменения уровня логирования отредактируйте `config.json`:
-
-| Уровень | Описание |
-|---|---|
-| `none` | Логирование отключено |
-| `error` | Только ошибки |
-| `warning` | Предупреждения и ошибки |
-| `info` | Информационные сообщения |
-| `debug` | Детальная отладочная информация |
-
-## Настройка интервала обновлений
-
-По умолчанию Watchtower проверяет обновления раз в сутки. Чтобы изменить интервал, отредактируйте `WATCHTOWER_POLL_INTERVAL` в `docker-compose.yml`:
-
-| Интервал | Значение (секунды) |
+| Интервал | Секунды |
 |---|---|
 | Каждые 6 часов | `21600` |
 | Каждые 12 часов | `43200` |
 | Раз в сутки | `86400` |
 | Раз в неделю | `604800` |
 
+</details>
+
+---
+
+## Уровни логирования
+
+| Уровень | Описание |
+|---|---|
+| `none` | Логирование отключено |
+| `error` | Только ошибки |
+| `warning` | Предупреждения и ошибки (по умолчанию) |
+| `info` | Информационные сообщения |
+| `debug` | Детальная отладка |
+
+Измените `loglevel` в `config.json` и перезапустите:
+
+```bash
+docker compose restart xray
+```
+
+---
+
 ## Структура проекта
 
 ```
 xray-docker-autoupdate/
-├── docker-compose.yml   # Конфигурация контейнеров
-├── config.json          # Конфигурация Xray
-├── logs/                # Директория логов (создаётся автоматически)
-│   ├── access.log
-│   └── error.log
-├── .gitignore
-└── README.md
+├── docker-compose.yml   # Docker Compose конфигурация
+├── config.json          # Конфигурация Xray (VLESS + Reality)
+├── logs/                # Логи Xray (создаётся автоматически)
+│   ├── access.log       # Лог подключений
+│   └── error.log        # Лог ошибок
+├── .gitignore           # Исключения для Git
+└── README.md            # Документация
 ```
+
+---
 
 ## Безопасность
 
-- Не публикуйте ваш `config.json` — он содержит приватные ключи
-- Регулярно проверяйте логи на наличие подозрительной активности
-- Используйте файрвол для ограничения доступа к серверу
-- Рекомендуется настроить SSH-доступ по ключу и отключить вход по паролю
+> **Важно:** Никогда не публикуйте ваш `config.json` — он содержит приватные ключи сервера.
+
+- Используйте файрвол (UFW / iptables) — откройте только порты 443 и SSH
+- Настройте SSH-доступ по ключу, отключите вход по паролю
+- Регулярно проверяйте логи Xray на подозрительную активность
+- Встроенные routing-правила блокируют доступ к приватным сетям и BitTorrent
+
+---
 
 ## Решение проблем
 
-### Контейнер Xray не запускается
+<details>
+<summary><b>Контейнер Xray не запускается</b></summary>
 
+Проверьте логи:
 ```bash
-# Проверьте логи
 docker compose logs xray
-
-# Проверьте валидность конфигурации
-docker run --rm -v $(pwd)/config.json:/etc/xray/config.json ghcr.io/xtls/xray-core:latest xray -test -config /etc/xray/config.json
 ```
 
-### Порт 443 занят
+Валидация конфигурации:
+```bash
+docker run --rm -v $(pwd)/config.json:/etc/xray/config.json \
+  ghcr.io/xtls/xray-core:latest xray -test -config /etc/xray/config.json
+```
 
-Убедитесь, что никакой другой сервис не использует порт 443:
+</details>
 
+<details>
+<summary><b>Порт 443 занят</b></summary>
+
+Найдите процесс, занимающий порт:
 ```bash
 sudo ss -tlnp | grep 443
 ```
 
-Если порт занят, остановите занимающий его процесс или измените порт в `config.json`.
+Остановите его или измените порт в `config.json`.
 
-### Watchtower не обновляет контейнер
+</details>
 
-Проверьте, что Watchtower имеет доступ к Docker-сокету:
+<details>
+<summary><b>Watchtower не обновляет контейнер</b></summary>
 
+Проверьте логи:
 ```bash
 docker compose logs watchtower
 ```
 
-Убедитесь, что в `docker-compose.yml` корректно прописан volume `/var/run/docker.sock`.
+Убедитесь, что Docker-сокет доступен:
+```bash
+ls -la /var/run/docker.sock
+```
+
+</details>
+
+<details>
+<summary><b>Клиент не подключается</b></summary>
+
+Проверьте:
+1. UUID на клиенте совпадает с `config.json`
+2. Public key (не private!) используется на клиенте
+3. SNI и Short ID совпадают с серверным конфигом
+4. Порт 443 открыт в файрволе: `sudo ufw allow 443/tcp`
+5. Flow установлен в `xtls-rprx-vision`
+
+</details>
+
+---
 
 ## Лицензия
 
-MIT
+Этот проект распространяется под лицензией [MIT](LICENSE).
+
+---
+
+<div align="center">
+
+**[Наверх](#xray-docker-auto-update)**
+
+</div>
