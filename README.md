@@ -324,6 +324,83 @@ Removing image ...
 
 ---
 
+## Мониторинг (Prometheus)
+
+Оба компонента поддерживают интеграцию с Prometheus.
+
+### Watchtower
+
+Watchtower предоставляет эндпоинт `/v1/metrics` с метриками в формате Prometheus. По умолчанию отключён.
+
+Для включения добавьте в `docker-compose.yml`:
+
+```yaml
+watchtower:
+  environment:
+    - WATCHTOWER_HTTP_API_METRICS=true
+    - WATCHTOWER_HTTP_API_TOKEN=your-secret-token
+  ports:
+    - "8080:8080"
+```
+
+Запрос метрик:
+
+```bash
+curl -H "Authorization: Bearer your-secret-token" http://localhost:8080/v1/metrics
+```
+
+Доступные метрики:
+
+| Метрика | Описание |
+|---|---|
+| `watchtower_container_scanned_total` | Количество проверенных контейнеров |
+| `watchtower_container_updated_total` | Количество обновлённых контейнеров |
+| `watchtower_container_failed_total` | Количество неудачных обновлений |
+| `watchtower_last_run_duration_seconds` | Длительность последней проверки |
+
+### Xray
+
+Xray предоставляет статистику трафика через встроенный эндпоинт `/debug/vars` (формат expvar/JSON). Для включения добавьте в `config.json` секцию `metrics`:
+
+```json
+{
+  "metrics": {
+    "tag": "metrics",
+    "port": 9090,
+    "listen": "0.0.0.0"
+  }
+}
+```
+
+> Секция `metrics` добавляется на верхнем уровне конфига, рядом с `log`, `inbounds`, `outbounds`.
+
+Запрос метрик:
+
+```bash
+curl http://localhost:9090/debug/vars
+```
+
+Ответ содержит статистику по каждому inbound/outbound:
+
+```json
+{
+  "stats": {
+    "inbound": {
+      "SOCKS": { "downlink": 19925615, "uplink": 5512 },
+      "HTTP":  { "downlink": 74460, "uplink": 10231 }
+    },
+    "outbound": {
+      "PROXY":  { "downlink": 23873238, "uplink": 1049595 },
+      "DIRECT": { "downlink": 97714548, "uplink": 3234617 }
+    }
+  }
+}
+```
+
+При использовании метрик Xray не забудьте пробросить порт `9090` если контейнер работает не в `network_mode: host`.
+
+---
+
 ## Уровни логирования
 
 | Уровень | Описание |
