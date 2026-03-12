@@ -1,6 +1,6 @@
 <div align="center">
 
-<img src="https://raw.githubusercontent.com/XTLS/Xray-core/main/docs/Xray-logo.png" alt="Xray" width="120"/>
+<img src="https://img.shields.io/badge/⚡_XRAY-Docker_Auto--Update-blue?style=for-the-badge&labelColor=1a1a2e&color=4a90d9&scale=3" alt="Xray Docker Auto-Update" height="60"/>
 
 # Xray Docker Auto-Update
 
