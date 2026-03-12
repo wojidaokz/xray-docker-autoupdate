@@ -85,6 +85,14 @@ graph LR
 curl -fsSL https://get.docker.com | sh
 ```
 
+Добавьте текущего пользователя в группу `docker`, чтобы не использовать `sudo`:
+
+```bash
+sudo usermod -aG docker $USER
+```
+
+> **Важно:** После добавления в группу необходимо **перелогиниться** (или выполнить `newgrp docker`), иначе `docker compose` будет выдавать ошибку `permission denied` при обращении к Docker-сокету, несмотря на то что пользователь уже в группе.
+
 Проверьте установку:
 
 ```bash
@@ -508,6 +516,36 @@ curl --proxy socks5h://127.0.0.1:10808 --max-time 10 https://ifconfig.me
 ports:
   - "10808:10808"
   - "10809:10809"
+```
+
+</details>
+
+<details>
+<summary><b>docker compose выдаёт permission denied</b></summary>
+
+Ошибка вида `permission denied while trying to connect to the docker API at unix:///var/run/docker.sock` возникает, когда пользователь не имеет доступа к Docker-сокету.
+
+**Причина:** пользователь не в группе `docker`, или был добавлен в группу, но не перелогинился.
+
+```bash
+# Проверьте членство в группе
+groups $USER
+
+# Если docker нет в списке — добавьте
+sudo usermod -aG docker $USER
+
+# После добавления обязательно перелогиньтесь
+# Или в текущей сессии выполните:
+newgrp docker
+
+# Проверка
+docker compose ps
+```
+
+**Временный обходной путь** — запуск через `sudo`:
+
+```bash
+sudo docker compose up -d
 ```
 
 </details>
