@@ -151,9 +151,7 @@ nano config.json
 | `YOUR-UUID-HERE` | UUID клиента | Шаг 3 → UUID |
 | `YOUR-PRIVATE-KEY-HERE` | Приватный ключ Reality | Шаг 3 → x25519 |
 | `YOUR-SHORT-ID-HERE` | Идентификатор сессии | Шаг 3 → Short ID |
-| `example.com` | Сайт-маскировка для Reality | Любой сайт с TLS 1.3 и H2 |
-
-> **Совет:** для маскировки подходят крупные сайты с поддержкой TLS 1.3 — `www.google.com`, `www.microsoft.com`, `www.apple.com`, `dl.google.com` и другие.
+| `example.com` | Сайт-маскировка для Reality | Домен с TLS 1.3 и H2 |
 
 ### 5. Запуск
 
