@@ -19,3 +19,4 @@ services:
       - WATCHTOWER_POLL_INTERVAL=86400
       - WATCHTOWER_INCLUDE_RESTARTING=true
     command: xray
+
